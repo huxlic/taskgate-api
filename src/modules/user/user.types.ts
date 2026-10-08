@@ -8,3 +8,5 @@ export interface User {
 	createdAt: Date | null;
 	updatedAt: Date | null;
 }
+
+export type PublicUser = Omit<User, "passwordHash">
