@@ -1,4 +1,4 @@
-import {env} from "./config.ts";
+import {env} from "./config.js";
 
 export const config = {
 	port: env.PORT,

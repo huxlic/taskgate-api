@@ -1,9 +1,9 @@
-import type {User} from "./user.types.ts";
-import {prisma} from "../../infrastructure/database/prisma.ts";
-import {ConflictError} from "../../common/errors/conflict-error.ts";
-import {Prisma} from "../../generated/prisma/client.ts";
+import type {User} from "./user.types.js";
+import {prisma} from "../../infrastructure/database/prisma.js";
+import {ConflictError} from "../../common/errors/conflict-error.js";
+import {Prisma} from "../../generated/prisma/client.js";
 
-export const create = async (data: Omit<User, "id" | "verifiedAt" | "createdAt" | "updatedAt">) => {
+export const create = async (data: Omit<User, "id" | "verifiedAt" | "createdAt" | "updatedAt">): Promise<User> => {
 	try {
 		return await prisma.user.create({data})
 	} catch (err: any) {

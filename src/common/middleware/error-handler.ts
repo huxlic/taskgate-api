@@ -1,6 +1,5 @@
 import type {NextFunction, Request, Response} from "express";
-import {AppError} from "../errors/app-error.ts";
-import {ZodError} from "zod";
+import {AppError} from "../errors/app-error.js";
 
 export const notFoundHandler = () => {
 	throw new AppError("Seems you got lost", 404);
