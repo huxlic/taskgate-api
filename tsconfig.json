@@ -9,6 +9,7 @@
     "module": "nodenext",
     "target": "esnext",
     "types": ["node"],
+    "rewriteRelativeImportExtensions": true,
 
     // Other Outputs
     "sourceMap": true,
