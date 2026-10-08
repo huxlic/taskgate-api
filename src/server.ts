@@ -1,6 +1,6 @@
 import app from "./app.ts";
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
 	console.log(`App listening on port ${PORT}`)
