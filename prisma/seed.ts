@@ -5,10 +5,7 @@ async function main() {
 		where: {
 			email: "johndoe@gmail.com"
 		},
-		update: {
-			firstName: "Johnny",
-			lastName: "Doe"
-		},
+		update: {},
 		create: {
 			id: "gfydywqysqywsgws7gy32t7e23te2e",
 			email: "johndoe@gmail.com",
@@ -19,4 +16,5 @@ async function main() {
 	});
 	console.log("Created user:", user);
 }
+
 main()
