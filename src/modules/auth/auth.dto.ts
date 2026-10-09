@@ -11,3 +11,8 @@ export const registerSchema = z.object({
 		.regex(/[0-9]/, { message: 'Must contain at least one number' })
 		.regex(/[^A-Za-z0-9]/, { message: 'Must contain at least one special character' })
 })
+
+export const loginSchema = z.object({
+	email: z.string().min(1, {message: "Email is required"}),
+	password: z.string().min(8, {message: "Password cannot be less than 8 characters"}).max(20, {message: "Password cannot be more than 20 characters"})
+})
