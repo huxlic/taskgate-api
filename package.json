@@ -13,6 +13,7 @@
   "keywords": [],
   "type": "module",
   "devDependencies": {
+    "@types/html-to-text": "^9.0.4",
     "@types/node": "^26.6.4",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"
@@ -26,6 +27,7 @@
     "dotenv": "^18.0.6",
     "express": "^5.2.1",
     "handlebars": "^4.7.10",
+    "html-to-text": "^10.0.1",
     "nodemailer": "^10.1.0",
     "prisma": "^7.10.0",
     "redis": "^6.3.0",

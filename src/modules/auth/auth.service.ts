@@ -4,11 +4,14 @@ import {AppError} from "../../common/errors/app-error.ts";
 import type {User} from "../user/user.types.ts";
 import {client} from "../../infrastructure/cache/redis-client.ts";
 import {generateOtp} from "../../common/utils/generate-otp.ts";
+import * as EmailService from "../../infrastructure/email/email.service.ts"
 
 export const createUser = async (data: Omit<User, "id" | "passwordHash" | "verifiedAt" | "createdAt" | "updatedAt">, password: string) => {
 	try {
 		const user = await UserService.create(data, password);
 		const otp = generateOtp();
+		
+		await EmailService.sendVerificationEmail({to: user.email, name: user.firstName, otp, expiresInMinutes: 5})
 		
 		await client.set(`email:otp:${user.email}`, otp, {
 			EX: 60 * 5
@@ -46,7 +49,7 @@ export const verifyOtp = async (email: string, otp: string) => {
 		if (!savedOtp) throw new AppError("OTP has expired. Request a new one", 400);
 		
 		if (otp !== savedOtp) throw new AppError("Invalid OTP", 400);
-		await client.destroy()
+		// await client.destroy()
 		
 	} catch (err) {
 		throw err;
