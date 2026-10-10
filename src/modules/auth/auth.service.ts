@@ -43,7 +43,7 @@ export const verifyEmail = async (email: string, otp: string) => {
 		if (!email) throw new AppError("Email is required", 401)
 		
 		const user = await UserService.findByEmail(email)
-		if (!user) throw new AppError("User with the email does not exist", 404)
+		if (user.verifiedAt) throw new AppError("Already verified", 409)
 		
 		const savedOtp = await client.get(`email:otp:${email}`);
 		if (!savedOtp) throw new AppError("OTP has expired. Request a new one", 400);
