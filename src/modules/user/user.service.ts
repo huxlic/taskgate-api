@@ -22,3 +22,8 @@ export const findByEmail = async (email: string): Promise<User> => {
 	if (!user) throw new AppError("User not found", 404);
 	return user;
 }
+
+export const verify = async (email: string): Promise<User> => {
+	return await UserRepository.verify(email);
+	
+}

@@ -45,11 +45,12 @@ export const verifyEmail = async (email: string, otp: string) => {
 		const user = await UserService.findByEmail(email)
 		if (!user) throw new AppError("User with the email does not exist", 404)
 		
-		const savedOtp = await client.get(`email:otp:${user.email}`);
+		const savedOtp = await client.get(`email:otp:${email}`);
 		if (!savedOtp) throw new AppError("OTP has expired. Request a new one", 400);
 		
 		if (otp !== savedOtp) throw new AppError("Invalid OTP", 400);
-		// await client.destroy()
+		await UserService.verify(email);
+		await client.del(`email:otp:${email}`)
 		
 	} catch (err) {
 		throw err;
