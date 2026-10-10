@@ -1,5 +1,4 @@
 import type {NextFunction, Request, Response} from "express";
-import * as UserService from "../user/user.service.js"
 import {toPublicUser} from "../user/user.mapper.js";
 import * as AuthService from "../auth/auth.service.js";
 import {trim} from "../../common/utils/trim.ts";
@@ -7,12 +6,11 @@ import {trim} from "../../common/utils/trim.ts";
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const {password, ...rest} = trim(req.body);
-		const user = await UserService.create(rest, password);
+		await AuthService.createUser(rest, password);
 		
 		res.status(201).json({
 			status: "success",
-			message: "User created successfully",
-			data: toPublicUser(user)
+			message: "OTP has been sent to your email for verification"
 		});
 	} catch (err) {
 		next(err)
@@ -29,6 +27,22 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 			message: "User logged in successfully",
 			data: toPublicUser(user)
 		});
+		
+	} catch (err) {
+		next(err);
+	}
+}
+
+export const verifyOtp = async (req: Request<{email: string, otp: string}>, res: Response, next: NextFunction) => {
+	try {
+		const {email, otp} = req.params;
+		
+		await AuthService.verifyOtp(email, otp)
+		
+		res.status(200).json({
+			status: "success",
+			message: "Email has been verified. Proceed to login",
+		})
 		
 	} catch (err) {
 		next(err);

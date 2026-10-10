@@ -4,7 +4,7 @@ import * as UserRepository from "./user.repository.js";
 import {ConflictError} from "../../common/errors/conflict-error.ts";
 import {AppError} from "../../common/errors/app-error.ts";
 
-export const create = async (input: Omit<User, "id" | "passwordHash" | "verifiedAt" | "createdAt" | "updatedAt">, password: string) => {
+export const create = async (input: Omit<User, "id" | "passwordHash" | "verifiedAt" | "createdAt" | "updatedAt">, password: string): Promise<User> => {
 	const passwordHash = await hashString(password);
 	
 	try {

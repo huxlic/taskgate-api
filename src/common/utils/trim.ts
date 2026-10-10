@@ -1,8 +1,11 @@
-export const trim = <T extends Record<string, string>>(data: T): T => {
-	const entries = Object.entries(data).map(([key, value]) => [
-		key,
-		value.trim()
-	]);
+export const trim = <T extends Record<string, any>>(data: T): T => {
+	const result = { ...data };
 	
-	return Object.fromEntries(entries) as T;
+	for (const key in result) {
+		if (typeof result[key] === "string") {
+			result[key] = result[key].trim();
+		}
+	}
+	
+	return result;
 };
