@@ -16,7 +16,7 @@ export const createUser = async (data: Omit<User, "id" | "passwordHash" | "verif
 		await client.set(`email:otp:${user.email}`, otp, {
 			EX: 60 * 5
 		});
-		// console.log(otp)
+		console.log(otp)
 		
 	} catch (err) {
 		throw err;
