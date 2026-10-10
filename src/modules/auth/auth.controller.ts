@@ -19,8 +19,9 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 export const login = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const {email, password} = req.body;
-		const user = await AuthService.login(email, password);
+		const {token, user} = await AuthService.login(email, password);
 		
+		res.header("Auth-token", token)
 		res.status(200).json({
 			status: "success",
 			message: "User logged in successfully",
@@ -32,7 +33,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 	}
 }
 
-export const verifyEmail = async (req: Request<{email: string, otp: string}>, res: Response, next: NextFunction) => {
+export const verifyEmail = async (req: Request<{ email: string, otp: string }>, res: Response, next: NextFunction) => {
 	try {
 		const {email, otp} = req.params;
 		

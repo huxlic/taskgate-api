@@ -14,16 +14,15 @@ export const authGuard = (req: Request, _res: Response, next: NextFunction) => {
 		const payload = jwt.verify(token, config.jwt.secret)
 		if (typeof payload !== "object") throw new AppError("Invalid authorization token", 401);
 		
-		const id = payload.id;
-		if (!id) throw new AppError("Invalid authorization token", 401);
+		const id: string = payload.id;
 		
-		req.user = id;
+		req.user = {id};
 		next()
 		
 	} catch (err: any) {
 		if (err instanceof jwt.TokenExpiredError) {
 			throw new AppError("Session has expired", 401);
 		}
-		throw new AppError("Authorization token is required", 401);
+		throw new AppError("You are not authorized", 401);
 	}
 }
