@@ -33,11 +33,11 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 	}
 }
 
-export const verifyOtp = async (req: Request<{email: string, otp: string}>, res: Response, next: NextFunction) => {
+export const verifyEmail = async (req: Request<{email: string, otp: string}>, res: Response, next: NextFunction) => {
 	try {
 		const {email, otp} = req.params;
 		
-		await AuthService.verifyOtp(email, otp)
+		await AuthService.verifyEmail(email, otp)
 		
 		res.status(200).json({
 			status: "success",

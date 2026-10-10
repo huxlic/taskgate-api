@@ -16,7 +16,7 @@ export const createUser = async (data: Omit<User, "id" | "passwordHash" | "verif
 		await client.set(`email:otp:${user.email}`, otp, {
 			EX: 60 * 5
 		});
-		console.log(otp)
+		// console.log(otp)
 		
 	} catch (err) {
 		throw err;
@@ -38,7 +38,7 @@ export const login = async (email: string, password: string): Promise<User> => {
 	}
 }
 
-export const verifyOtp = async (email: string, otp: string) => {
+export const verifyEmail = async (email: string, otp: string) => {
 	try {
 		if (!email) throw new AppError("Email is required", 401)
 		
