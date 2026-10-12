@@ -48,3 +48,19 @@ export const verifyEmail = async (req: Request<{ email: string, otp: string }>, 
 		next(err);
 	}
 }
+
+export const requestOtp = async (req: Request<{email: string | undefined}>, res: Response, next: NextFunction) => {
+	try {
+		const {email} = req.params;
+		
+		await AuthService.requestOtp(email)
+		
+		res.status(200).json({
+			status: "success",
+			message: "OTP has been sent to your email",
+		})
+		
+	} catch (err) {
+		next(err);
+	}
+}

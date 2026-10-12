@@ -18,13 +18,22 @@ export const getByEmail = async (email: string): Promise<User | null> => {
 	return await prisma.user.findUnique({where: {email}});
 }
 
-export const verify = async (email: string): Promise<User> => {
+export const verify = async (email: string) => {
 	return await prisma.user.update({
 		where: {
 			email
 		},
 		data: {
 			verifiedAt: new Date()
+		}
+	})
+}
+
+export const getUnique = async (id: string): Promise<User | null> => {
+	return await prisma.user.findUnique({
+		where: {id},
+		include: {
+			tasks: true
 		}
 	})
 }

@@ -1,7 +1,7 @@
 import app from "./app.js";
 import {config} from "./config/index.js";
 import {prisma} from "./infrastructure/database/prisma.js";
-import {client} from "./infrastructure/cache/redis-client.ts";
+import {client} from "./infrastructure/cache/redis-client.js";
 
 const PORT = config.port;
 

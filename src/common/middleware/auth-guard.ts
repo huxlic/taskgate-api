@@ -1,7 +1,7 @@
 import type {NextFunction, Request, Response} from "express";
-import {AppError} from "../errors/app-error.ts";
+import {AppError} from "../errors/app-error.js";
 import jwt from "jsonwebtoken";
-import {config} from "../../config/index.ts";
+import {config} from "../../config/index.js";
 
 export const authGuard = (req: Request, _res: Response, next: NextFunction) => {
 	const authHeader = req.headers.authorization;
@@ -19,7 +19,7 @@ export const authGuard = (req: Request, _res: Response, next: NextFunction) => {
 		req.user = {id};
 		next()
 		
-	} catch (err: any) {
+	} catch (err) {
 		if (err instanceof jwt.TokenExpiredError) {
 			throw new AppError("Session has expired", 401);
 		}

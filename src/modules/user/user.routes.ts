@@ -1,8 +1,10 @@
 import express, {type Router} from "express";
-// import {createUser} from "./user.controller.ts";
+import {authGuard} from "../../common/middleware/auth-guard.js";
+import {getUser, getUserTasks} from "./user.controller.js";
 
 const router: Router = express.Router();
 
-// router.post("/register", createUser);
+router.get("/api/v1/me", authGuard, getUser);
+router.get("/api/v1/me/tasks", authGuard, getUserTasks);
 
 export default router;

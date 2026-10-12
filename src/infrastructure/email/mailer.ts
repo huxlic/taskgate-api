@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
-import {config} from "../../config/index.ts";
-import type {MailInput} from "./email.types.ts";
+import {config} from "../../config/index.js";
+import type {MailInput} from "./email.types.js";
 
 export const transporter = nodemailer.createTransport({
 	host: config.smtp.host,

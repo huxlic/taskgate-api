@@ -1,17 +1,21 @@
-import express, {type Express, type Request, type Response} from 'express';
+import express, {type Express, type NextFunction, type Request, type Response} from 'express';
 import {errorHandler, notFoundHandler} from "./common/middleware/error-handler.js";
-// import userRoutes from "./modules/user/user.routes.js";
-import authRoutes from "./modules/auth/auth.routes.ts";
+import userRoutes from "./modules/user/user.routes.js";
+import authRoutes from "./modules/auth/auth.routes.js";
 
 const app: Express = express()
 
 app.use(express.json());
 
-// app.use(userRoutes)
+app.use(userRoutes)
 app.use(authRoutes)
 
-app.get("/health", (_req: Request, res: Response) => {
-	res.status(200).json({status: "OK"});
+app.get("/health", (_req: Request, res: Response, next: NextFunction) => {
+	try {
+		res.status(200).json({status: "OK"});
+	} catch (err) {
+		next(err)
+	}
 });
 
 app.use(notFoundHandler)

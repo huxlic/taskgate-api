@@ -2,8 +2,8 @@ import Handlebars from "handlebars";
 import path from "node:path";
 import * as fs from "node:fs/promises";
 import {convert} from "html-to-text"
-import type {SendVerificationEmailInput} from "./email.types.ts";
-import {sendMail} from "./mailer.ts";
+import type {SendVerificationEmailInput} from "./email.types.js";
+import {sendMail} from "./mailer.js";
 
 export const sendVerificationEmail = async ({
 	                                            to,
