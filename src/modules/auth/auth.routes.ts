@@ -5,9 +5,9 @@ import {loginSchema, registerSchema} from "./auth.dto.js";
 
 const router: Router = express.Router();
 
-router.post("/api/v1/auth/register", validate(registerSchema), createUser)
-router.post("/api/v1/auth/login", validate(loginSchema), login)
-router.get("/api/v1/auth/verify-otp/:email/:otp", verifyEmail)
-router.get("/api/v1/auth/request-otp/:email", requestOtp)
+router.post("/auth/register", validate(registerSchema), createUser)
+router.post("/auth/login", validate(loginSchema), login)
+router.get("/auth/verify-otp/:email/:otp", verifyEmail)
+router.get("/auth/request-otp/:email", requestOtp)
 
 export default router;

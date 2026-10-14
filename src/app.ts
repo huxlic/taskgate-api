@@ -7,8 +7,8 @@ const app: Express = express()
 
 app.use(express.json());
 
-app.use(userRoutes)
-app.use(authRoutes)
+app.use("/api/v1", userRoutes)
+app.use("/api/v1", authRoutes)
 
 app.get("/health", (_req: Request, res: Response, next: NextFunction) => {
 	try {

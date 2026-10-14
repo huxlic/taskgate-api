@@ -31,9 +31,6 @@ export const verify = async (email: string) => {
 
 export const getUnique = async (id: string): Promise<User | null> => {
 	return await prisma.user.findUnique({
-		where: {id},
-		include: {
-			tasks: true
-		}
+		where: {id}
 	})
 }

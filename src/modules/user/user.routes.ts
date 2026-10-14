@@ -4,7 +4,7 @@ import {getUser, getUserTasks} from "./user.controller.js";
 
 const router: Router = express.Router();
 
-router.get("/api/v1/me", authGuard, getUser);
-router.get("/api/v1/me/tasks", authGuard, getUserTasks);
+router.get("/me", authGuard, getUser);
+router.get("/me/tasks", authGuard, getUserTasks);
 
 export default router;
