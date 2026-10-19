@@ -8,11 +8,11 @@ import jwt from "jsonwebtoken";
 import {config} from "../../config/index.js";
 import {genEmailOtpKey} from "../../common/utils/redis-helpers.js";
 import {redis} from "../../infrastructure/cache/redis-client.ts";
+import {hashCode} from "../../common/utils/hash-code.ts";
 
 export const createUser = async (data: Omit<User, "id" | "passwordHash" | "verifiedAt" | "createdAt" | "updatedAt">, password: string) => {
 	const user = await UserService.create(data, password);
 	const code = generateOtp();
-	console.log(code)
 	const key = genEmailOtpKey(user.email)
 	
 	await redis
@@ -44,27 +44,27 @@ export const verifyEmail = async (email: string, otp: string) => {
 	const user = await UserService.findByEmail(email)
 	if (user.verifiedAt) throw new AppError("Already verified", 409)
 	
-	const savedOtp = await redis.get(genEmailOtpKey(email))
+	const savedOtp = await redis.hGet(genEmailOtpKey(email), "hash")
 	
 	if (!savedOtp) throw new AppError("OTP has expired. Request a new one", 400);
 	
-	if (otp !== savedOtp) throw new AppError("Invalid OTP", 400);
+	if (hashCode(otp) !== savedOtp) throw new AppError("Invalid OTP", 400);
 	await UserService.verify(email);
 	const key = genEmailOtpKey(email)
 	await redis.del(key);
 }
 
 export const requestOtp = async (email: string) => {
-	
 	const user = await UserService.findByEmail(email);
 	
+	if (user.verifiedAt) throw new AppError("Already verified. Login instead", 401)
+	
 	const code = generateOtp();
-	console.log(code)
 	const key = genEmailOtpKey(email)
 	
 	await redis
 		.multi()
-		.hSet(key, {hash: code, attempts: 0})
+		.hSet(key, {hash: hashCode(code), attempts: 0})
 		.expire(key, 600)
 		.exec();
 	

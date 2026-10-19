@@ -52,30 +52,16 @@ export const verifyEmail = async (req: Request<{ email: string, otp: string }>, 
 	}
 }
 
-export const requestOtp = async (req: Request<{ email: string | undefined }>, res: Response, next: NextFunction) => {
+export const requestOtp = async (req: Request<{ email: string}>, res: Response, next: NextFunction) => {
 	try {
-		const {email} = req.params;
-		if (!email) throw new AppError("Email is required", 401)
-		
-		const limitKey = cooldownKey(email);
-		const allowed = await redis.set(limitKey, "1", {NX: true, EX: 60})
-		
-		if (!allowed) {
-			const wait = await redis.ttl(limitKey);
-			res.setHeader("Retry-After", `${String(wait)}s`)
-			return res.status(429).json({
-				status: "failed",
-				message: `Please wait ${wait}s before requesting another code`
-			});
-		}
+		const {email} = req.body;
 		await AuthService.requestOtp(email)
 		
 		res.status(200).json({
 			status: "success",
 			message: "OTP has been sent to your email",
 		})
-	} catch
-		(err) {
+	} catch (err) {
 		next(err);
 	}
 }

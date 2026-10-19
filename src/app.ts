@@ -2,6 +2,7 @@ import express, {type Express, type NextFunction, type Request, type Response} f
 import {errorHandler, notFoundHandler} from "./common/middleware/error-handler.js";
 import userRoutes from "./modules/user/user.routes.js";
 import authRoutes from "./modules/auth/auth.routes.js";
+import {prisma} from "./infrastructure/database/prisma.ts";
 
 const app: Express = express()
 
@@ -10,9 +11,10 @@ app.use(express.json());
 app.use("/api/v1", userRoutes)
 app.use("/api/v1", authRoutes)
 
-app.get("/health", (_req: Request, res: Response, next: NextFunction) => {
+app.get("/api/v1/health", async (_req: Request, res: Response, next: NextFunction) => {
 	try {
-		res.status(200).json({status: "OK"});
+		const user = await prisma.user.findUnique({where: {email: "alex.smith_12@subdomain.company.org"}})
+		res.status(200).json({status: "OK", user});
 	} catch (err) {
 		next(err)
 	}
