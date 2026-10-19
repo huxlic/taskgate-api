@@ -57,8 +57,6 @@ export const verifyEmail = async (email: string, otp: string) => {
 export const requestOtp = async (email: string) => {
 	const user = await UserService.findByEmail(email);
 	
-	if (user.verifiedAt) throw new AppError("Already verified. Login instead", 401)
-	
 	const code = generateOtp();
 	const key = genEmailOtpKey(email)
 	

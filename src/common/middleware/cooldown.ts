@@ -1,12 +1,21 @@
 import type {NextFunction, Request, Response} from "express"
-import {cooldownKey} from "../utils/redis-helpers.ts";
-import {redis} from "../../infrastructure/cache/redis-client.ts";
+import {cooldownKey} from "../utils/redis-helpers.js";
+import {redis} from "../../infrastructure/cache/redis-client.js";
+import * as UserService from "../../modules/user/user.service.js"
 
 export const cooldown = () => {
 	return async (req: Request, res: Response, next: NextFunction) => {
-		const key = cooldownKey(req.body.email)
-		
+		const email = req.body.email
 		try {
+			const user = await UserService.findByEmail(email)
+			if (user.verifiedAt) {
+				return res.status(400).json({
+					status: "failed",
+					message: "Already verified."
+				})
+			}
+			
+			const key = cooldownKey(email)
 			const allowed = await redis.set(key, "1", {NX: true, EX: 60})
 			
 			if (!allowed) {
