@@ -11,13 +11,18 @@ import {redis} from "../../infrastructure/cache/redis-client.ts";
 
 export const createUser = async (data: Omit<User, "id" | "passwordHash" | "verifiedAt" | "createdAt" | "updatedAt">, password: string) => {
 	const user = await UserService.create(data, password);
-	const otp = generateOtp();
-	console.log(otp)
+	const code = generateOtp();
+	console.log(code)
 	const key = genEmailOtpKey(user.email)
 	
-	await redis.set(key, otp)
+	await redis
+		.multi()
+		.hSet(key, {hash: code, attempts: 0})
+		.expire(key, 600)
+		.exec();
 	
-	await EmailService.sendVerificationEmail({to: user.email, name: user.firstName, otp, expiresInMinutes: 5})
+	
+	await EmailService.sendVerificationEmail({to: user.email, name: user.firstName, otp: code, expiresInMinutes: 5})
 	
 }
 
@@ -53,11 +58,15 @@ export const requestOtp = async (email: string | undefined) => {
 	if (!email) throw new AppError("Email is required", 401)
 	
 	const user = await UserService.findByEmail(email);
-	const otp = generateOtp();
-	console.log(otp)
+	const code = generateOtp();
+	console.log(code)
 	const key = genEmailOtpKey(email)
 	
-	await redis.set(key, otp)
-	await EmailService.sendVerificationEmail({to: user.email, name: user.firstName, otp, expiresInMinutes: 5});
+	await redis
+		.multi()
+		.hSet(key, {hash: code, attempts: 0})
+		.expire(key, 600)
+		.exec();
 	
+	await EmailService.sendVerificationEmail({to: user.email, name: user.firstName, otp: code, expiresInMinutes: 5});
 }
