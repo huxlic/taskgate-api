@@ -54,10 +54,10 @@ export const verifyEmail = async (email: string, otp: string) => {
 	await redis.del(key);
 }
 
-export const requestOtp = async (email: string | undefined) => {
-	if (!email) throw new AppError("Email is required", 401)
+export const requestOtp = async (email: string) => {
 	
 	const user = await UserService.findByEmail(email);
+	
 	const code = generateOtp();
 	console.log(code)
 	const key = genEmailOtpKey(email)
