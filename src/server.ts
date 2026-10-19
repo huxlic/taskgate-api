@@ -1,7 +1,7 @@
 import app from "./app.js";
 import {config} from "./config/index.js";
 import {prisma} from "./infrastructure/database/prisma.js";
-import {client} from "./infrastructure/cache/redis-client.js";
+import {connectRedis} from "./infrastructure/cache/redis-client.js";
 
 const PORT = config.port;
 
@@ -9,7 +9,7 @@ const startServer = async () => {
 	try {
 		await prisma.$connect();
 		await prisma.$queryRaw`SELECT 1`;
-		await client.connect();
+		await connectRedis();
 		
 		app.listen(PORT, () => {
 			console.log(`App listening on port ${PORT}`)
@@ -21,4 +21,4 @@ const startServer = async () => {
 	}
 }
 
-startServer();
+await startServer();

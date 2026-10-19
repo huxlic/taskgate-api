@@ -6,14 +6,16 @@ import {generateOtp} from "../../common/utils/generate-otp.js";
 import * as EmailService from "../../infrastructure/email/email.service.js"
 import jwt from "jsonwebtoken";
 import {config} from "../../config/index.js";
-import {deleteEmailOtp, getEmailOtp, saveEmailOtp} from "../../common/utils/redis-helpers.js";
+import {genEmailOtpKey} from "../../common/utils/redis-helpers.js";
+import {redis} from "../../infrastructure/cache/redis-client.ts";
 
 export const createUser = async (data: Omit<User, "id" | "passwordHash" | "verifiedAt" | "createdAt" | "updatedAt">, password: string) => {
 	const user = await UserService.create(data, password);
 	const otp = generateOtp();
 	console.log(otp)
+	const key = genEmailOtpKey(user.email)
 	
-	await saveEmailOtp(user.email, otp)
+	await redis.set(key, otp)
 	
 	await EmailService.sendVerificationEmail({to: user.email, name: user.firstName, otp, expiresInMinutes: 5})
 	
@@ -37,13 +39,14 @@ export const verifyEmail = async (email: string, otp: string) => {
 	const user = await UserService.findByEmail(email)
 	if (user.verifiedAt) throw new AppError("Already verified", 409)
 	
-	const savedOtp = await getEmailOtp(email)
+	const savedOtp = await redis.get(genEmailOtpKey(email))
 	
 	if (!savedOtp) throw new AppError("OTP has expired. Request a new one", 400);
 	
 	if (otp !== savedOtp) throw new AppError("Invalid OTP", 400);
 	await UserService.verify(email);
-	await deleteEmailOtp(email)
+	const key = genEmailOtpKey(email)
+	await redis.del(key);
 }
 
 export const requestOtp = async (email: string | undefined) => {
@@ -52,9 +55,9 @@ export const requestOtp = async (email: string | undefined) => {
 	const user = await UserService.findByEmail(email);
 	const otp = generateOtp();
 	console.log(otp)
+	const key = genEmailOtpKey(email)
 	
-	await saveEmailOtp(user.email, otp)
-	
+	await redis.set(key, otp)
 	await EmailService.sendVerificationEmail({to: user.email, name: user.firstName, otp, expiresInMinutes: 5});
 	
 }

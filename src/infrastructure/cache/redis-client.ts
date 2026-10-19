@@ -1,3 +1,5 @@
 import {createClient} from "redis";
 
-export const client = createClient()
+export const redis = createClient()
+
+export const connectRedis = () => redis.connect();
