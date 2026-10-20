@@ -41,9 +41,6 @@ export const login = async (email: string, password: string): Promise<{ token: s
 }
 
 export const verifyEmail = async (email: string, code: string) => {
-	const user = await UserService.findByEmail(email)
-	if (user.verifiedAt) throw new AppError("Already verified", 409)
-	
 	const key = emailOtpKey(email)
 	const savedHash = await redis.hGet(key, "hash")
 	if (!savedHash) throw new AppError("OTP has expired. Request a new one", 400);

@@ -7,7 +7,7 @@ export const cooldown = async (req: Request, res: Response, next: NextFunction) 
 	
 	try {
 		const key = cooldownKey("otp", email)
-		const allowed = await redis.set(key, "1", {EX: 2, condition: "NX"})
+		const allowed = await redis.set(key, "1", {EX: 60, condition: "NX"})
 		
 		if (!allowed) {
 			const wait = Math.max(await redis.ttl(key), 1);

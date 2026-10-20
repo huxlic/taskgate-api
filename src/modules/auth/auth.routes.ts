@@ -11,11 +11,10 @@ const router: Router = express.Router();
 
 router.post("/auth/register", validate(registerSchema), createUser)
 router.post("/auth/login", validate(loginSchema), login)
-router.post("/auth/request-otp", validate(requestOtpSchema), verifyAccess, cooldown, rateLimit({
+router.post("/auth/request-otp", validate(requestOtpSchema), cooldown, rateLimit({
 	prefix: 'otp-request-email',
-	limit: 3,
 	identify: byEmail
 }), requestOtp)
-router.post("/auth/verify-otp", validate(verifyEmailSchema), verifyEmail)
+router.post("/auth/verify-otp", validate(verifyEmailSchema), verifyAccess, verifyEmail)
 
 export default router;
