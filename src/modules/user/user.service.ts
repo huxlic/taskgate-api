@@ -23,6 +23,10 @@ export const findByEmail = async (email: string): Promise<User> => {
 	return user;
 }
 
+export const findByEmailDontThrow = async (email: string): Promise<User | null> => {
+	return await UserRepository.getByEmail(email);
+}
+
 export const verify = async (email: string): Promise<User> => {
 	return await UserRepository.verify(email);
 	
