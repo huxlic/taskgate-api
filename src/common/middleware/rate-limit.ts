@@ -4,7 +4,6 @@ import {rateLimitKey} from "../utils/redis-helpers.ts";
 
 interface Options {
 	prefix: string;
-	limit: number;
 	identify: (req: Request) => string;
 }
 
@@ -17,7 +16,10 @@ local ttl = redis.call('TTL', KEYS[1])
 return { current, ttl }
 `;
 
-export const rateLimit = ({prefix, limit, identify}: Options) => {
+const LIMIT = 3;
+const WINDOW_SECONDS = 600;
+
+export const rateLimit = ({prefix, identify}: Options) => {
 	return async (req: Request, res: Response, next: NextFunction) => {
 		const id = identify(req);
 		if (!id) return res.status(400).json({status: "failed", message: "Missing identifier"});
@@ -27,10 +29,10 @@ export const rateLimit = ({prefix, limit, identify}: Options) => {
 		try {
 			const [count, ttl] = (await redis.eval(SCRIPT, {
 				keys: [key],
-				arguments: ["600"]
+				arguments: [String(WINDOW_SECONDS)]
 			})) as [number, number]
 			
-			if (count > limit) {
+			if (count > LIMIT) {
 				const wait = Math.max(ttl, 1);
 				res.setHeader("Retry-After", String(wait));
 				return res.status(429).json({
