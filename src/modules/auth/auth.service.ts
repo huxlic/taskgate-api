@@ -6,14 +6,16 @@ import {generateOtp} from "../../common/utils/generate-otp.js";
 import * as EmailService from "../../infrastructure/email/email.service.js"
 import jwt from "jsonwebtoken";
 import {config} from "../../config/index.js";
-import {genEmailOtpKey} from "../../common/utils/redis-helpers.js";
+import {emailOtpKey} from "../../common/utils/redis-helpers.js";
 import {redis} from "../../infrastructure/cache/redis-client.ts";
 import {hashCode} from "../../common/utils/hash-code.ts";
+
+const MAX_ATTEMPTS = 5;
 
 export const createUser = async (data: Omit<User, "id" | "passwordHash" | "verifiedAt" | "createdAt" | "updatedAt">, password: string) => {
 	const user = await UserService.create(data, password);
 	const code = generateOtp();
-	const key = genEmailOtpKey(user.email)
+	const key = emailOtpKey(user.email)
 	
 	await redis
 		.multi()
@@ -38,19 +40,27 @@ export const login = async (email: string, password: string): Promise<{ token: s
 	return {token, user};
 }
 
-export const verifyEmail = async (email: string, otp: string) => {
-	if (!email) throw new AppError("Email is required", 400)
-	
+export const verifyEmail = async (email: string, code: string) => {
 	const user = await UserService.findByEmail(email)
 	if (user.verifiedAt) throw new AppError("Already verified", 409)
 	
-	const savedOtp = await redis.hGet(genEmailOtpKey(email), "hash")
+	const key = emailOtpKey(email)
+	const savedHash = await redis.hGet(key, "hash")
+	if (!savedHash) throw new AppError("OTP has expired. Request a new one", 400);
 	
-	if (!savedOtp) throw new AppError("OTP has expired. Request a new one", 400);
+	const attempts = await redis.hIncrBy(key, "attempts", 1);
 	
-	if (hashCode(otp) !== savedOtp) throw new AppError("Invalid OTP", 400);
+	if (attempts > MAX_ATTEMPTS) {
+		await redis.del(key);
+		throw new AppError("Too many attempts. Request a new code", 429);
+	}
+	
+	if (hashCode(code) !== savedHash) {
+		if (attempts === MAX_ATTEMPTS) await redis.del(key);
+		throw new AppError("Invalid OTP", 400);
+	}
+	
 	await UserService.verify(email);
-	const key = genEmailOtpKey(email)
 	await redis.del(key);
 }
 
@@ -58,7 +68,7 @@ export const requestOtp = async (email: string) => {
 	const user = await UserService.findByEmail(email);
 	
 	const code = generateOtp();
-	const key = genEmailOtpKey(email)
+	const key = emailOtpKey(email)
 	
 	await redis
 		.multi()

@@ -20,3 +20,8 @@ export const loginSchema = z.object({
 export const requestOtpSchema = z.object({
 	email: z.email({message: "Invalid email address"}).trim().toLowerCase().max(200),
 })
+
+export const verifyEmailSchema = z.object({
+	email: z.email({message: "Invalid email address"}).trim().toLowerCase().max(200),
+	code: z.string().min(1, {message: "Invalid OTP"}).max(6, {message: "Invalid OTP"})
+})

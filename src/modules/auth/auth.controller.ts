@@ -1,9 +1,6 @@
 import type {NextFunction, Request, Response} from "express";
 import {toPublicUser} from "../user/user.mapper.js";
 import * as AuthService from "../auth/auth.service.js";
-import {cooldownKey} from "../../common/utils/redis-helpers.ts";
-import {redis} from "../../infrastructure/cache/redis-client.ts";
-import {AppError} from "../../common/errors/app-error.ts";
 
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
 	try {
@@ -36,11 +33,11 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 	}
 }
 
-export const verifyEmail = async (req: Request<{ email: string, otp: string }>, res: Response, next: NextFunction) => {
+export const verifyEmail = async (req: Request<{ email: string, code: string }>, res: Response, next: NextFunction) => {
 	try {
-		const {email, otp} = req.params;
+		const {email, code} = req.body;
 		
-		await AuthService.verifyEmail(email, otp)
+		await AuthService.verifyEmail(email, code)
 		
 		res.status(200).json({
 			status: "success",
