@@ -11,7 +11,7 @@ const router: Router = express.Router();
 
 router.post("/auth/register", validate(registerSchema), createUser)
 router.post("/auth/login", validate(loginSchema), login)
-router.post("/auth/request-otp", validate(requestOtpSchema), verifyAccess, cooldown, rateLimit({
+router.post("/auth/request-otp", validate(requestOtpSchema), cooldown, verifyAccess, rateLimit({
 	prefix: 'otp-request-email',
 	identify: byEmail
 }), requestOtp)

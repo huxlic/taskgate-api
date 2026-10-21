@@ -44,7 +44,7 @@ export const login = async (email: string, password: string): Promise<{ token: s
 	if (!user.verifiedAt) throw new AppError("You are not authorized. Verify your email", 401)
 	
 	const valid = await compareHash(password, user.passwordHash);
-	if (!valid) throw new AppError("Invalid password", 400);
+	if (!valid) throw new AppError("Invalid credentials", 400);
 	
 	const token = jwt.sign({id: user.id}, config.jwt.secret, {expiresIn: "1h",})
 	

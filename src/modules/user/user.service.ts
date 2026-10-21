@@ -19,7 +19,7 @@ export const create = async (input: Omit<User, "id" | "passwordHash" | "verified
 
 export const findByEmail = async (email: string): Promise<User> => {
 	const user = await UserRepository.getByEmail(email);
-	if (!user) throw new AppError("User with the email does not exist", 404);
+	if (!user) throw new AppError("Invalid credentials", 404);
 	return user;
 }
 
