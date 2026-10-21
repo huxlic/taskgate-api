@@ -9,8 +9,8 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 		
 		res.status(201).json({
 			status: "success",
-			message: "OTP has been sent to your email for verification"
-		});
+			message: "If an account exists for this email, a verification code has been sent.",
+		})
 	} catch (err) {
 		next(err)
 	}

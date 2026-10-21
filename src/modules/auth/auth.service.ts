@@ -11,21 +11,32 @@ import {redis} from "../../infrastructure/cache/redis-client.ts";
 import {hashCode} from "../../common/utils/hash-code.ts";
 
 const MAX_ATTEMPTS = 5;
+const OTP_TTL_SECONDS = 600;
 
-export const createUser = async (data: Omit<User, "id" | "passwordHash" | "verifiedAt" | "createdAt" | "updatedAt">, password: string) => {
-	const user = await UserService.create(data, password);
+export const issueOtp = async (user: Pick<User, "email" | "firstName">) => {
 	const code = generateOtp();
 	const key = emailOtpKey(user.email)
 	
 	await redis
 		.multi()
-		.hSet(key, {hash: code, attempts: 0})
-		.expire(key, 600)
+		.hSet(key, {hash: hashCode(code), attempts: 0})
+		.expire(key, OTP_TTL_SECONDS)
 		.exec();
 	
-	
-	await EmailService.sendVerificationEmail({to: user.email, name: user.firstName, otp: code, expiresInMinutes: 5})
-	
+	EmailService.sendVerificationEmail({
+		to: user.email,
+		name: user.firstName,
+		otp: code,
+		expiresInMinutes: OTP_TTL_SECONDS / 60
+	}).catch(async (err) => {
+		console.error("Failed to send OTP email:", err);
+		await redis.del(cooldownKey("otp", user.email));
+	});
+}
+
+export const createUser = async (data: Omit<User, "id" | "passwordHash" | "verifiedAt" | "createdAt" | "updatedAt">, password: string) => {
+	const user = await UserService.create(data, password);
+	await issueOtp(user);
 }
 
 export const login = async (email: string, password: string): Promise<{ token: string, user: User }> => {
@@ -68,24 +79,5 @@ export const requestOtp = async (email: string) => {
 	const user = await UserService.findByEmailOrNull(email);
 	
 	if (!user || user.verifiedAt) return;
-	
-	const OTP_TTL_SECONDS = 600
-	const code = generateOtp();
-	const key = emailOtpKey(email)
-	
-	await redis
-		.multi()
-		.hSet(key, {hash: hashCode(code), attempts: 0})
-		.expire(key, OTP_TTL_SECONDS)
-		.exec();
-	
-	EmailService.sendVerificationEmail({
-		to: user.email,
-		name: user.firstName,
-		otp: code,
-		expiresInMinutes: OTP_TTL_SECONDS / 60
-	}).catch(async (err) => {
-		console.error("Failed to send OTP email:", err);
-		await redis.del(cooldownKey("otp", email)); // let them retry right away
-	});
+	await issueOtp(user);
 }
