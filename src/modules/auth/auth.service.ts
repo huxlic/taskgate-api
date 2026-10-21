@@ -6,7 +6,7 @@ import {generateOtp} from "../../common/utils/generate-otp.js";
 import * as EmailService from "../../infrastructure/email/email.service.js"
 import jwt from "jsonwebtoken";
 import {config} from "../../config/index.js";
-import {emailOtpKey} from "../../common/utils/redis-helpers.js";
+import {cooldownKey, emailOtpKey} from "../../common/utils/redis-helpers.js";
 import {redis} from "../../infrastructure/cache/redis-client.ts";
 import {hashCode} from "../../common/utils/hash-code.ts";
 
@@ -43,7 +43,10 @@ export const login = async (email: string, password: string): Promise<{ token: s
 export const verifyEmail = async (email: string, code: string) => {
 	const key = emailOtpKey(email)
 	const savedHash = await redis.hGet(key, "hash")
-	if (!savedHash) throw new AppError("OTP has expired. Request a new one", 400);
+	if (!savedHash) {
+		await redis.del(key);
+		throw new AppError("OTP has expired. Request a new one", 400);
+	}
 	
 	const attempts = await redis.hIncrBy(key, "attempts", 1);
 	
@@ -62,16 +65,27 @@ export const verifyEmail = async (email: string, code: string) => {
 }
 
 export const requestOtp = async (email: string) => {
-	const user = await UserService.findByEmail(email);
+	const user = await UserService.findByEmailOrNull(email);
 	
+	if (!user || user.verifiedAt) return;
+	
+	const OTP_TTL_SECONDS = 600
 	const code = generateOtp();
 	const key = emailOtpKey(email)
 	
 	await redis
 		.multi()
 		.hSet(key, {hash: hashCode(code), attempts: 0})
-		.expire(key, 600)
+		.expire(key, OTP_TTL_SECONDS)
 		.exec();
 	
-	await EmailService.sendVerificationEmail({to: user.email, name: user.firstName, otp: code, expiresInMinutes: 5});
+	EmailService.sendVerificationEmail({
+		to: user.email,
+		name: user.firstName,
+		otp: code,
+		expiresInMinutes: OTP_TTL_SECONDS / 60
+	}).catch(async (err) => {
+		console.error("Failed to send OTP email:", err);
+		await redis.del(cooldownKey("otp", email)); // let them retry right away
+	});
 }

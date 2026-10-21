@@ -5,7 +5,7 @@ export const verifyAccess = async (req: Request, res: Response, next: NextFuncti
 	const email: string = req.body.email;
 	
 	try {
-		const user = await UserService.findByEmailDontThrow(email)
+		const user = await UserService.findByEmailOrNull(email)
 		if (user?.verifiedAt) {
 			return res.status(400).json({
 				status: "failed",

@@ -56,7 +56,7 @@ export const requestOtp = async (req: Request<{ email: string}>, res: Response, 
 		
 		res.status(200).json({
 			status: "success",
-			message: "OTP has been sent to your email",
+			message: "If an account exists for this email, a verification code has been sent.",
 		})
 	} catch (err) {
 		next(err);
