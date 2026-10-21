@@ -9,8 +9,8 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 		
 		res.status(201).json({
 			status: "success",
-			message: "OTP has been sent to your email for verification"
-		});
+			message: "If an account exists for this email, a verification code has been sent.",
+		})
 	} catch (err) {
 		next(err)
 	}
@@ -33,11 +33,11 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 	}
 }
 
-export const verifyEmail = async (req: Request<{ email: string, otp: string }>, res: Response, next: NextFunction) => {
+export const verifyEmail = async (req: Request<{ email: string, code: string }>, res: Response, next: NextFunction) => {
 	try {
-		const {email, otp} = req.params;
+		const {email, code} = req.body;
 		
-		await AuthService.verifyEmail(email, otp)
+		await AuthService.verifyEmail(email, code)
 		
 		res.status(200).json({
 			status: "success",
@@ -49,17 +49,15 @@ export const verifyEmail = async (req: Request<{ email: string, otp: string }>, 
 	}
 }
 
-export const requestOtp = async (req: Request<{email: string | undefined}>, res: Response, next: NextFunction) => {
+export const requestOtp = async (req: Request<{ email: string}>, res: Response, next: NextFunction) => {
 	try {
-		const {email} = req.params;
-		
+		const {email} = req.body;
 		await AuthService.requestOtp(email)
 		
 		res.status(200).json({
 			status: "success",
-			message: "OTP has been sent to your email",
+			message: "If an account exists for this email, a verification code has been sent.",
 		})
-		
 	} catch (err) {
 		next(err);
 	}

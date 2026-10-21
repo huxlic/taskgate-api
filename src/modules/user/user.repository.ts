@@ -15,7 +15,9 @@ export const create = async (data: Omit<User, "id" | "verifiedAt" | "createdAt" 
 }
 
 export const getByEmail = async (email: string): Promise<User | null> => {
-	return await prisma.user.findUnique({where: {email}});
+	return await prisma.user.findUnique({
+		where: {email},
+	})
 }
 
 export const verify = async (email: string) => {

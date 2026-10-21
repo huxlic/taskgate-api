@@ -17,5 +17,8 @@ export const config = {
 	},
 	jwt: {
 		secret: env.JWT_SECRET_KEY,
+	},
+	hmac: {
+		secret: env.HASH_MAC
 	}
 }
